@@ -1,9 +1,10 @@
 import React from "react";
+import Page from "./Page";
 
-const About = () => {
+const Terms = () => {
   return (
-    <div class="container container--narrow py-md-5">
-      <h2>About Us</h2>
+    <Page title="Terms & Conditions">
+      <h2>Our Terms &amp; Conditions</h2>
       <p class="lead text-muted">
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis
         dolorum labore quisquam vel id dicta fuga! Ducimus, quo. Dolore commodi
@@ -24,8 +25,15 @@ const About = () => {
         nobis provident quo dolorum sapiente temporibus facere non repellendus
         consequatur cupiditate!
       </p>
-    </div>
+      <h3>Details</h3>
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Quae laboriosam
+        distinctio atque sint earum? Temporibus, voluptas aspernatur aliquam
+        nisi sed harum laborum, nemo odio animi officia quisquam. Veniam, natus
+        reprehenderit.
+      </p>
+    </Page>
   );
 };
 
-export default About;
+export default Terms;
