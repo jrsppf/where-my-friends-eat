@@ -1,12 +1,20 @@
-import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
+import { Tooltip } from "react-tooltip";
+import StateContext from "../StateContext";
+import DispatchContext from "../DispatchContext";
 
 // Components
 import Page from "./Page";
 import LoadingDotsIcon from "./LoadingDotsIcon";
+import NotFound from "./NotFound";
 
 const ViewSinglePost = () => {
+  const appState = useContext(StateContext);
+  const appDispatch = useContext(DispatchContext);
+  const navigate = useNavigate();
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [post, setPost] = useState();
@@ -31,6 +39,10 @@ const ViewSinglePost = () => {
     };
   }, []);
 
+  if (!isLoading && !post) {
+    return <NotFound />;
+  }
+
   if (isLoading) {
     return (
       <Page title={"..."}>
@@ -44,18 +56,63 @@ const ViewSinglePost = () => {
     postDate.getMonth() + 1
   }/${postDate.getDate()}/${postDate.getFullYear()}`;
 
+  function isOwner() {
+    if (appState.loggedIn) {
+      return appState.user.username === post.author.username;
+    }
+    return false;
+  }
+
+  async function deleteHandler() {
+    const deleteConfirmation = window.confirm(
+      "Do you really want to delete this post?"
+    );
+    if (deleteConfirmation) {
+      try {
+        const response = await axios.delete(`/post/${id}`, {
+          data: { token: appState.user.token },
+        });
+        if (response.data === "Success") {
+          // 1. dispaly flash message
+          appDispatch({
+            type: "flashMessage",
+            value: "Post was successfully deleted.",
+          });
+          // 2. redirect back to current user's profile
+          navigate(`/profile/${appState.user.username}`);
+        }
+      } catch (e) {
+        console.log("there was a problem");
+      }
+    }
+  }
+
   return (
     <Page title={post.title}>
       <div className="d-flex justify-content-between">
         <h2>{post.title}</h2>
-        <span className="pt-2">
-          <a href="#" className="text-primary mr-2" title="Edit">
-            <i className="fas fa-edit"></i>
-          </a>
-          <a className="delete-post-button text-danger" title="Delete">
-            <i className="fas fa-trash"></i>
-          </a>
-        </span>
+        {isOwner() && (
+          <span className="pt-2">
+            <Link
+              data-tip="Edit"
+              data-tooltip-id="edit"
+              to={`/post/${post._id}/edit`}
+              className="text-primary mr-2"
+            >
+              <i className="fas fa-edit"></i>
+            </Link>
+            <Tooltip id="edit" className="custom-tooltip" />{" "}
+            <a
+              onClick={deleteHandler}
+              data-tip="Delete"
+              data-tooltip-id="delete"
+              className="delete-post-button text-danger"
+            >
+              <i className="fas fa-trash"></i>
+            </a>
+            <Tooltip id="delete" className="custom-tooltip" />
+          </span>
+        )}
       </div>
 
       <p className="text-muted small mb-4">
@@ -70,8 +127,22 @@ const ViewSinglePost = () => {
       </p>
 
       <div className="body-content">
-        <p>{post.title}</p>
-        <p>{post.body}</p>
+        <ReactMarkdown
+          children={post.body}
+          allowedElements={[
+            "p",
+            "br",
+            "em",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "ul",
+            "ol",
+            "li",
+          ]}
+        />
       </div>
     </Page>
   );

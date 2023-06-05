@@ -22,7 +22,7 @@ const HeaderLoggedIn = (props) => {
       <Link to={`/profile/${appState.user.username}`} className="mr-2">
         <img className="small-header-avatar" src={appState.user.avatar} />
       </Link>
-      <Link to="/create-post" className="btn btn-sm btn-success mr-2">
+      <Link to="/create-post" className="btn btn-sm btn-primary mr-2">
         Create Post
       </Link>
       <button onClick={handleLogout} className="btn btn-sm btn-secondary">

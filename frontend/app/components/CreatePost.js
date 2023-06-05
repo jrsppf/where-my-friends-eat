@@ -42,10 +42,38 @@ const CreatePost = (props) => {
           </label>
           <input
             onChange={(e) => setTitle(e.target.value)}
-            autoFocus
             name="title"
             id="post-title"
-            className="form-control form-control-lg form-control-title"
+            className="form-control form-control-title"
+            type="text"
+            placeholder=""
+            autoComplete="off"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="post-title" className="text-muted mb-1">
+            <small>Restaurant</small>
+          </label>
+          <input
+            onChange={(e) => setTitle(e.target.value)}
+            autoFocus
+            name="restaurant"
+            id="post-restaurant"
+            className="form-control form-control-lg"
+            type="text"
+            placeholder=""
+            autoComplete="off"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="post-title" className="text-muted mb-1">
+            <small>Location</small>
+          </label>
+          <input
+            onChange={(e) => setTitle(e.target.value)}
+            name="location"
+            id="post-location"
+            className="form-control form-control-lg"
             type="text"
             placeholder=""
             autoComplete="off"
@@ -54,7 +82,7 @@ const CreatePost = (props) => {
 
         <div className="form-group">
           <label htmlFor="post-body" className="text-muted mb-1 d-block">
-            <small>Body Content</small>
+            <small>Review</small>
           </label>
           <textarea
             onChange={(e) => setBody(e.target.value)}
@@ -65,7 +93,7 @@ const CreatePost = (props) => {
           ></textarea>
         </div>
 
-        <button className="btn btn-primary">Save New Post</button>
+        <button className="btn btn-primary">Post Review</button>
       </form>
     </Page>
   );
