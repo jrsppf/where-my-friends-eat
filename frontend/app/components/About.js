@@ -5,7 +5,7 @@ const About = () => {
   return (
     <Page title="About Us">
       <h2>About Us</h2>
-      <p class="lead text-muted">
+      <p className="lead text-muted">
         Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis
         dolorum labore quisquam vel id dicta fuga! Ducimus, quo. Dolore commodi
         aliquid error veritatis consequuntur, excepturi cumque fuga eum incidunt

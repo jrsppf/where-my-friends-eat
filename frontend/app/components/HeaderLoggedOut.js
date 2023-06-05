@@ -1,20 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import DispatchContext from "../DispatchContext";
 import axios from "axios";
 
 const HeaderLoggedOut = (props) => {
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
+  const appDispatch = useContext(DispatchContext);
+
 
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8080/login", {
+      const response = await axios.post("/login", {
         username,
         password,
       });
       if (response.data) {
-        console.log(response);
-        props.setLoggedIn(true);
+
+
+        appDispatch({ type: "login", data: response.data });
       } else {
         console.log("incorrect username and/or password");
       }
