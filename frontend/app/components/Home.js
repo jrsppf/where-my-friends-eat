@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
-import Page from "./Page";
 import StateContext from "../StateContext";
+
+// Components
+import Page from "./Page";
 
 const Home = () => {
   const appState = useContext(StateContext);

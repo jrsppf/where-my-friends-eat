@@ -1,9 +1,11 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import Page from "./Page";
 import axios from "axios";
 import DispatchContext from "../DispatchContext";
 import StateContext from "../StateContext";
+
+// Components
+import Page from "./Page";
 
 const CreatePost = (props) => {
   const [title, setTitle] = useState();

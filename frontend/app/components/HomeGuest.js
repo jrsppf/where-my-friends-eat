@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import Page from "./Page";
 import axios from "axios";
+
+// Components
+import Page from "./Page";
 
 const HomeGuest = () => {
   const [username, setUsername] = useState();

@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import HomeGuest from "./components/HomeGuest";
 import Home from "./components/Home";
+import Profile from "./components/Profile";
 import Footer from "./components/Footer";
 import About from "./components/About";
 import Terms from "./components/Terms";
@@ -69,6 +70,7 @@ function Main() {
               path="/"
               element={state.loggedIn ? <Home /> : <HomeGuest />}
             />
+            <Route path="/profile/:username/*" element={<Profile />} />
             <Route path="/create-post" element={<CreatePost />} />
             <Route path="/post/:id" element={<ViewSinglePost />} />
             <Route path="/about-us" element={<About />} />

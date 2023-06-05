@@ -1,4 +1,6 @@
 import React from "react";
+
+// Components
 import Page from "./Page";
 
 const About = () => {
