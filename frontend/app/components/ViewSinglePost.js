@@ -37,7 +37,7 @@ const ViewSinglePost = () => {
     return () => {
       request.cancel();
     };
-  }, []);
+  }, [id]);
 
   if (!isLoading && !post) {
     return <NotFound />;

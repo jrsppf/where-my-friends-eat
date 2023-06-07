@@ -21,6 +21,16 @@ const EditPost = () => {
       hasErrors: false,
       message: "",
     },
+    restaurant: {
+      value: "",
+      hasErrors: false,
+      message: "",
+    },
+    neighborhood: {
+      value: "",
+      hasErrors: false,
+      message: "",
+    },
     body: {
       value: "",
       hasErrors: false,
@@ -37,12 +47,22 @@ const EditPost = () => {
     switch (action.type) {
       case "fetchComplete":
         draft.title.value = action.value.title;
+        draft.restaurant.value = action.value.restaurant;
+        draft.neighborhood.value = action.value.neighborhood;
         draft.body.value = action.value.body;
         draft.isFetching = false;
         return;
       case "titleChange":
         draft.title.hasErrors = false;
         draft.title.value = action.value;
+        return;
+      case "restaurantChange":
+        draft.restaurant.hasErrors = false;
+        draft.restaurant.value = action.value;
+        return;
+      case "neighborhoodChange":
+        draft.neighborhood.hasErrors = false;
+        draft.neighborhood.value = action.value;
         return;
       case "bodyChange":
         draft.body.hasErrors = false;
@@ -65,6 +85,18 @@ const EditPost = () => {
           draft.title.message = "Title cannot be empty.";
           return;
         }
+      case "restaurantRules":
+        if (!action.value.trim()) {
+          draft.restaurant.hasErrors = true;
+          draft.restaurant.message = "Restaurant cannot be empty.";
+          return;
+        }
+      case "neighborhoodRules":
+        if (!action.value.trim()) {
+          draft.neighborhood.hasErrors = true;
+          draft.neighborhood.message = "Neighborhood cannot be empty.";
+          return;
+        }
       case "bodyRules":
         if (!action.value.trim()) {
           draft.body.hasErrors = true;
@@ -82,6 +114,8 @@ const EditPost = () => {
   function submitHandler(e) {
     e.preventDefault();
     dispatch({ type: "titleRules", value: state.title.value });
+    dispatch({ type: "restaurantRules", value: state.restaurant.value });
+    dispatch({ type: "neighborhoodRules", value: state.neighborhood.value });
     dispatch({ type: "bodyRules", value: state.body.value });
     dispatch({ type: "submitRequest" });
   }
@@ -127,6 +161,8 @@ const EditPost = () => {
             `/post/${state.id}/edit`,
             {
               title: state.title.value,
+              restaurant: state.restaurant.value,
+              neighborhood: state.neighborhood.value,
               body: state.body.value,
               token: appState.user.token,
             },
@@ -162,7 +198,7 @@ const EditPost = () => {
   return (
     <Page title={"Edit Post"}>
       <Link to={`/post/${state.id}`} className="small font-weight-bold">
-        &laquo; Back to post permalink
+        &laquo; Back
       </Link>
       <form onSubmit={submitHandler} className="mt-3">
         <div className="form-group">
@@ -191,10 +227,47 @@ const EditPost = () => {
             </div>
           )}
         </div>
-
+        <div className="form-group">
+          <label htmlFor="post-restaurant" className="text-muted mb-1">
+            <small>Restaurant</small>
+          </label>
+          <input
+            onBlur={(e) =>
+              dispatch({ type: "restaurantRules", value: e.target.value })
+            }
+            onChange={(e) =>
+              dispatch({ type: "restaurantChange", value: e.target.value })
+            }
+            name="restaurant"
+            id="post-location"
+            className="form-control form-control-lg"
+            type="text"
+            placeholder=""
+            autoComplete="off"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="post-neighborhood" className="text-muted mb-1">
+            <small>Neighborhood</small>
+          </label>
+          <input
+            onBlur={(e) =>
+              dispatch({ type: "neighborhoodRules", value: e.target.value })
+            }
+            onChange={(e) =>
+              dispatch({ type: "neighborhoodChange", value: e.target.value })
+            }
+            name="neighborhood"
+            id="post-location"
+            className="form-control form-control-lg"
+            type="text"
+            placeholder=""
+            autoComplete="off"
+          />
+        </div>
         <div className="form-group">
           <label htmlFor="post-body" className="text-muted mb-1 d-block">
-            <small>Body Content</small>
+            <small>Review</small>
           </label>
           <textarea
             onBlur={(e) =>

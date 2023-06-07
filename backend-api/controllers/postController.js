@@ -19,7 +19,7 @@ exports.apiUpdate = function(req, res) {
     .then(status => {
       // the post was successfully updated in the database
       // or user did have permission, but there were validation errors
-      if (status == "success") {
+      if (status === "success") {
         res.json("success")
       } else {
         res.json("failure")

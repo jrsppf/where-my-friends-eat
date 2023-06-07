@@ -1,195 +1,264 @@
-const postsCollection = require("../db").db().collection("posts")
-const followsCollection = require("../db").db().collection("follows")
-const ObjectID = require("mongodb").ObjectID
-const User = require("./User")
-const sanitizeHTML = require("sanitize-html")
+const postsCollection = require("../db").db().collection("posts");
+const followsCollection = require("../db").db().collection("follows");
+const ObjectID = require("mongodb").ObjectID;
+const User = require("./User");
+const sanitizeHTML = require("sanitize-html");
 
-postsCollection.createIndex({ title: "text", body: "text" })
+postsCollection.createIndex({
+  title: "text",
+  restaurant: "text",
+  neighborhood: "text",
+  body: "text",
+});
 
 let Post = function (data, userid, requestedPostId) {
-  this.data = data
-  this.errors = []
-  this.userid = userid
-  this.requestedPostId = requestedPostId
-}
+  this.data = data;
+  this.errors = [];
+  this.userid = userid;
+  this.requestedPostId = requestedPostId;
+};
 
 Post.prototype.cleanUp = function () {
   if (typeof this.data.title != "string") {
-    this.data.title = ""
+    this.data.title = "";
+  }
+  if (typeof this.data.restaurant != "string") {
+    this.data.restaurant = "";
+  }
+  if (typeof this.data.neighborhood != "string") {
+    this.data.neighborhood = "";
   }
   if (typeof this.data.body != "string") {
-    this.data.body = ""
+    this.data.body = "";
   }
 
   // get rid of any bogus properties
   this.data = {
-    title: sanitizeHTML(this.data.title.trim(), { allowedTags: [], allowedAttributes: {} }),
-    body: sanitizeHTML(this.data.body.trim(), { allowedTags: [], allowedAttributes: {} }),
+    title: sanitizeHTML(this.data.title.trim(), {
+      allowedTags: [],
+      allowedAttributes: {},
+    }),
+    restaurant: sanitizeHTML(this.data.restaurant.trim(), {
+      allowedTags: [],
+      allowedAttributes: {},
+    }),
+    neighborhood: sanitizeHTML(this.data.neighborhood.trim(), {
+      allowedTags: [],
+      allowedAttributes: {},
+    }),
+    body: sanitizeHTML(this.data.body.trim(), {
+      allowedTags: [],
+      allowedAttributes: {},
+    }),
     createdDate: new Date(),
-    author: ObjectID(this.userid)
-  }
-}
+    author: ObjectID(this.userid),
+  };
+};
 
 Post.prototype.validate = function () {
   if (this.data.title == "") {
-    this.errors.push("You must provide a title.")
+    this.errors.push("You must provide a title.");
+  }
+  if (this.data.restaurant == "") {
+    this.errors.push("You must provide a restaurant.");
+  }
+  if (this.data.neighborhood == "") {
+    this.errors.push("You must provide a neighborhood.");
   }
   if (this.data.body == "") {
-    this.errors.push("You must provide post content.")
+    this.errors.push("You must provide post content.");
   }
-}
+};
 
 Post.prototype.create = function () {
   return new Promise((resolve, reject) => {
-    this.cleanUp()
-    this.validate()
+    this.cleanUp();
+    this.validate();
     if (!this.errors.length) {
       // save post into database
       postsCollection
         .insertOne(this.data)
-        .then(info => {
-          resolve(info.insertedId)
+        .then((info) => {
+          resolve(info.insertedId);
         })
-        .catch(e => {
-          this.errors.push("Please try again later.")
-          reject(this.errors)
-        })
+        .catch((e) => {
+          this.errors.push("Please try again later.");
+          reject(this.errors);
+        });
     } else {
-      reject(this.errors)
+      reject(this.errors);
     }
-  })
-}
+  });
+};
 
 Post.prototype.update = function () {
   return new Promise(async (resolve, reject) => {
     try {
-      let post = await Post.findSingleById(this.requestedPostId, this.userid)
+      let post = await Post.findSingleById(this.requestedPostId, this.userid);
       if (post.isVisitorOwner) {
         // actually update the db
-        let status = await this.actuallyUpdate()
-        resolve(status)
+        let status = await this.actuallyUpdate();
+        resolve(status);
       } else {
-        reject()
+        reject();
       }
     } catch (e) {
-      reject()
+      reject();
     }
-  })
-}
+  });
+};
 
 Post.prototype.actuallyUpdate = function () {
   return new Promise(async (resolve, reject) => {
-    this.cleanUp()
-    this.validate()
+    this.cleanUp();
+    this.validate();
     if (!this.errors.length) {
-      await postsCollection.findOneAndUpdate({ _id: new ObjectID(this.requestedPostId) }, { $set: { title: this.data.title, body: this.data.body } })
-      resolve("success")
+      await postsCollection.findOneAndUpdate(
+        { _id: new ObjectID(this.requestedPostId) },
+        {
+          $set: {
+            title: this.data.title,
+            restaurant: this.data.restaurant,
+            neighborhood: this.data.neighborhood,
+            body: this.data.body,
+          },
+        }
+      );
+      resolve("success");
     } else {
-      resolve("failure")
+      resolve("failure");
     }
-  })
-}
+  });
+};
 
-Post.reusablePostQuery = function (uniqueOperations, visitorId, finalOperations = []) {
+Post.reusablePostQuery = function (
+  uniqueOperations,
+  visitorId,
+  finalOperations = []
+) {
   return new Promise(async function (resolve, reject) {
     let aggOperations = uniqueOperations
       .concat([
-        { $lookup: { from: "users", localField: "author", foreignField: "_id", as: "authorDocument" } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "author",
+            foreignField: "_id",
+            as: "authorDocument",
+          },
+        },
         {
           $project: {
             title: 1,
+            restaurant: 1,
+            neighborhood: 1,
             body: 1,
             createdDate: 1,
             authorId: "$author",
-            author: { $arrayElemAt: ["$authorDocument", 0] }
-          }
-        }
+            author: { $arrayElemAt: ["$authorDocument", 0] },
+          },
+        },
       ])
-      .concat(finalOperations)
+      .concat(finalOperations);
 
-    let posts = await postsCollection.aggregate(aggOperations).toArray()
+    let posts = await postsCollection.aggregate(aggOperations).toArray();
 
     // clean up author property in each post object
     posts = posts.map(function (post) {
-      post.isVisitorOwner = post.authorId.equals(visitorId)
-      post.authorId = undefined
+      post.isVisitorOwner = post.authorId.equals(visitorId);
+      post.authorId = undefined;
 
       post.author = {
         username: post.author.username,
-        avatar: new User(post.author, true).avatar
-      }
+        avatar: new User(post.author, true).avatar,
+      };
 
-      return post
-    })
+      return post;
+    });
 
-    resolve(posts)
-  })
-}
+    resolve(posts);
+  });
+};
 
 Post.findSingleById = function (id, visitorId) {
   return new Promise(async function (resolve, reject) {
     if (typeof id != "string" || !ObjectID.isValid(id)) {
-      reject()
-      return
+      reject();
+      return;
     }
 
-    let posts = await Post.reusablePostQuery([{ $match: { _id: new ObjectID(id) } }], visitorId)
+    let posts = await Post.reusablePostQuery(
+      [{ $match: { _id: new ObjectID(id) } }],
+      visitorId
+    );
 
     if (posts.length) {
-      resolve(posts[0])
+      resolve(posts[0]);
     } else {
-      reject()
+      reject();
     }
-  })
-}
+  });
+};
 
 Post.findByAuthorId = function (authorId) {
-  return Post.reusablePostQuery([{ $match: { author: authorId } }, { $sort: { createdDate: -1 } }])
-}
+  return Post.reusablePostQuery([
+    { $match: { author: authorId } },
+    { $sort: { createdDate: -1 } },
+  ]);
+};
 
 Post.delete = function (postIdToDelete, currentUserId) {
   return new Promise(async (resolve, reject) => {
     try {
-      let post = await Post.findSingleById(postIdToDelete, currentUserId)
+      let post = await Post.findSingleById(postIdToDelete, currentUserId);
       if (post.isVisitorOwner) {
-        await postsCollection.deleteOne({ _id: new ObjectID(postIdToDelete) })
-        resolve()
+        await postsCollection.deleteOne({ _id: new ObjectID(postIdToDelete) });
+        resolve();
       } else {
-        reject()
+        reject();
       }
     } catch (e) {
-      reject()
+      reject();
     }
-  })
-}
+  });
+};
 
 Post.search = function (searchTerm) {
   return new Promise(async (resolve, reject) => {
     if (typeof searchTerm == "string") {
-      let posts = await Post.reusablePostQuery([{ $match: { $text: { $search: searchTerm } } }], undefined, [{ $sort: { score: { $meta: "textScore" } } }])
-      resolve(posts)
+      let posts = await Post.reusablePostQuery(
+        [{ $match: { $text: { $search: searchTerm } } }],
+        undefined,
+        [{ $sort: { score: { $meta: "textScore" } } }]
+      );
+      resolve(posts);
     } else {
-      reject()
+      reject();
     }
-  })
-}
+  });
+};
 
 Post.countPostsByAuthor = function (id) {
   return new Promise(async (resolve, reject) => {
-    let postCount = await postsCollection.countDocuments({ author: id })
-    resolve(postCount)
-  })
-}
+    let postCount = await postsCollection.countDocuments({ author: id });
+    resolve(postCount);
+  });
+};
 
 Post.getFeed = async function (id) {
   // create an array of the user ids that the current user follows
-  let followedUsers = await followsCollection.find({ authorId: new ObjectID(id) }).toArray()
+  let followedUsers = await followsCollection
+    .find({ authorId: new ObjectID(id) })
+    .toArray();
   followedUsers = followedUsers.map(function (followDoc) {
-    return followDoc.followedId
-  })
+    return followDoc.followedId;
+  });
 
   // look for posts where the author is in the above array of followed users
-  return Post.reusablePostQuery([{ $match: { author: { $in: followedUsers } } }, { $sort: { createdDate: -1 } }])
-}
+  return Post.reusablePostQuery([
+    { $match: { author: { $in: followedUsers } } },
+    { $sort: { createdDate: -1 } },
+  ]);
+};
 
-module.exports = Post
+module.exports = Post;

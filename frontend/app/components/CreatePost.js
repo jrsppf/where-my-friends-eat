@@ -9,6 +9,8 @@ import Page from "./Page";
 
 const CreatePost = (props) => {
   const [title, setTitle] = useState();
+  const [restaurant, setRestaurant] = useState();
+  const [neighborhood, setNeighborhood] = useState();
   const [body, setBody] = useState();
   const navigate = useNavigate();
   const appDispatch = useContext(DispatchContext);
@@ -19,6 +21,8 @@ const CreatePost = (props) => {
     try {
       const response = await axios.post("/create-post", {
         title,
+        restaurant,
+        neighborhood,
         body,
         token: appState.user.token,
       });
@@ -51,13 +55,13 @@ const CreatePost = (props) => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="post-title" className="text-muted mb-1">
+          <label htmlFor="post-restaurant" className="text-muted mb-1">
             <small>Restaurant</small>
           </label>
           <input
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => setRestaurant(e.target.value)}
             autoFocus
-            name="restaurant"
+            name="restaurantName"
             id="post-restaurant"
             className="form-control form-control-lg"
             type="text"
@@ -66,12 +70,12 @@ const CreatePost = (props) => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="post-title" className="text-muted mb-1">
-            <small>Location</small>
+          <label htmlFor="post-neighborhood" className="text-muted mb-1">
+            <small>Neighborhood</small>
           </label>
           <input
-            onChange={(e) => setTitle(e.target.value)}
-            name="location"
+            onChange={(e) => setNeighborhood(e.target.value)}
+            name="neighborhood"
             id="post-location"
             className="form-control form-control-lg"
             type="text"

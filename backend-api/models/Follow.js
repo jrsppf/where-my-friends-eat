@@ -23,10 +23,10 @@ Follow.prototype.validate = async function(action) {
   }
 
   let doesFollowAlreadyExist = await followsCollection.findOne({followedId: this.followedId, authorId: new ObjectID(this.authorId)})
-  if (action == "create") {
+  if (action === "create") {
     if (doesFollowAlreadyExist) {this.errors.push("You are already following this user.")}
   }
-  if (action == "delete") {
+  if (action === "delete") {
     if (!doesFollowAlreadyExist) {this.errors.push("You cannot stop following someone you do not already follow.")}
   }
 
