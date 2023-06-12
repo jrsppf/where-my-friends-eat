@@ -2,7 +2,6 @@ import React, { useEffect, useContext } from "react";
 import DispatchContext from "../DispatchContext";
 import { useImmer } from "use-immer";
 import axios from "axios";
-import { Link } from "react-router-dom";
 
 // Components
 import Post from "./Post";
@@ -47,25 +46,48 @@ const Search = () => {
   useEffect(() => {
     if (state.requestCount) {
       const ourRequest = axios.CancelToken.source();
-      async function fetchPostResults() {
+      async function fetchResults() {
         try {
           const response = await axios.post(
-            "/search",
+            "/search/posts",
             { searchTerm: state.searchTerm },
             { cancelToken: ourRequest.token }
           );
+
           setState((draft) => {
             draft.results.posts = response.data;
+
             draft.show = "results";
           });
         } catch (e) {
           console.log("There was a problem or the request was cancelled.");
         }
       }
-      fetchPostResults();
+      fetchResults();
       return () => ourRequest.cancel();
     }
   }, [state.requestCount]);
+
+  // useEffect(() => {
+  //   if (state.requestCount) {
+  //     const ourRequest = axios.CancelToken.source();
+  //     async function fetchResults() {
+  //       try {
+  //         const response = await axios.post(
+  //           "/search/users",
+  //           { searchTerm: state.searchTerm },
+  //           { cancelToken: ourRequest.token }
+  //         );
+
+  //         console.log(response.data);
+  //       } catch (e) {
+  //         console.log("There was a problem or the request was HELLO.");
+  //       }
+  //     }
+  //     fetchResults();
+  //     return () => ourRequest.cancel();
+  //   }
+  // }, [state.requestCount]);
 
   function searchKeyPressHandler(e) {
     if (e.keyCode === 27) {
@@ -119,11 +141,13 @@ const Search = () => {
               (state.show === "results" ? "live-search-results--visible" : "")
             }
           >
-            {Boolean(state.results.posts.length) && (
+            {Boolean(
+              state.results.posts.length || state.results.users.length
+            ) && (
               <div className="list-group shadow-sm">
                 <div className="list-group-item active">
                   <strong>Search Results</strong> ({state.results.length}
-                  {state.results.posts.length > 1 ? "items" : "item"} found)
+                  {state.results.length > 1 ? "items" : "item"} found)
                 </div>
                 {state.results.posts.map((post) => {
                   return (
@@ -137,6 +161,10 @@ const Search = () => {
                       }
                     />
                   );
+                })}
+
+                {state.results.users.map((user) => {
+                  return <div></div>;
                 })}
               </div>
             )}
