@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
+import DispatchContext from "../DispatchContext";
+
 
 // Components
 import Page from "./Page";
 
 const HomeGuest = () => {
+  const appDispatch = useContext(DispatchContext);
+
+
   const [username, setUsername] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
@@ -12,12 +17,17 @@ const HomeGuest = () => {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      await axios.post("/register", {
+      const response = await axios.post("/register", {
         username,
         email,
         password,
       });
-      console.log("User was successfully created");
+      if (response.data) {
+        console.log("User was successfully created");
+        appDispatch({ type: "login", data: response.data });
+      } else {
+        console.log("There was an error");
+      }
     } catch (e) {
       console.log("There was an error");
     }
@@ -27,9 +37,7 @@ const HomeGuest = () => {
     <Page title="Welcome" wide={true}>
       <div className="row align-items-center">
         <div className="col-lg-7 py-3 py-md-5">
-          <h1 className="display-3">
-            Recommendations That Matter
-          </h1>
+          <h1 className="display-3">Recommendations That Matter</h1>
           <p className="lead text-muted">
             Welcome to Where My Friends Eat, where eating out becomes a informed
             adventure powered by your friends! Tired of endlessly searching for
