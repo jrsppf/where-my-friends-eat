@@ -12,7 +12,10 @@ const Search = () => {
 
   const [state, setState] = useImmer({
     searchTerm: "",
-    results: [],
+    results: {
+      posts: [],
+      users: [],
+    },
     show: "neither",
     requestCount: 0,
   });
@@ -44,7 +47,7 @@ const Search = () => {
   useEffect(() => {
     if (state.requestCount) {
       const ourRequest = axios.CancelToken.source();
-      async function fetchResults() {
+      async function fetchPostResults() {
         try {
           const response = await axios.post(
             "/search",
@@ -52,14 +55,14 @@ const Search = () => {
             { cancelToken: ourRequest.token }
           );
           setState((draft) => {
-            draft.results = response.data;
+            draft.results.posts = response.data;
             draft.show = "results";
           });
         } catch (e) {
           console.log("There was a problem or the request was cancelled.");
         }
       }
-      fetchResults();
+      fetchPostResults();
       return () => ourRequest.cancel();
     }
   }, [state.requestCount]);
@@ -116,13 +119,13 @@ const Search = () => {
               (state.show === "results" ? "live-search-results--visible" : "")
             }
           >
-            {Boolean(state.results.length) && (
+            {Boolean(state.results.posts.length) && (
               <div className="list-group shadow-sm">
                 <div className="list-group-item active">
-                  <strong>Search Results</strong> ({state.results.length}{" "}
-                  {state.results.length > 1 ? "items" : "item"} found)
+                  <strong>Search Results</strong> ({state.results.length}
+                  {state.results.posts.length > 1 ? "items" : "item"} found)
                 </div>
-                {state.results.map((post) => {
+                {state.results.posts.map((post) => {
                   return (
                     <Post
                       post={post}
@@ -137,7 +140,7 @@ const Search = () => {
                 })}
               </div>
             )}
-            {!Boolean(state.results.length) && (
+            {!Boolean(state.results.posts.length) && (
               <p className="alert alert-danger text-center shadow-sm">
                 Sorry, we could not find any results for that search.
               </p>
