@@ -17,6 +17,7 @@ const Post = (props) => {
       <img className="avatar-tiny" src={post.author.avatar} />{" "}
       <strong>{post.title}</strong>{" "}
       <span className="text-muted small">
+        {post.restaurant} in {post.neighborhood}{" "}
         {!props.noAuthor && <>by {post.author.username}</>} on {dateFormatted}{" "}
       </span>
     </Link>

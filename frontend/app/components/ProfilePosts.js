@@ -21,6 +21,7 @@ function ProfilePosts(props) {
         });
         setPosts(response.data);
         setIsLoading(false);
+        console.log(response.data);
       } catch (e) {
         console.log("There was a problem.");
       }

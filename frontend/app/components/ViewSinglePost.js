@@ -114,7 +114,9 @@ const ViewSinglePost = () => {
           </span>
         )}
       </div>
-
+      <h4>
+        A review of {post.restaurant} in {post.neighborhood}
+      </h4>
       <p className="text-muted small mb-4">
         <Link to={`/profile/${post.author.username}`}>
           <img className="avatar-tiny" src={post.author.avatar} />
@@ -127,22 +129,7 @@ const ViewSinglePost = () => {
       </p>
 
       <div className="body-content">
-        <ReactMarkdown
-          children={post.body}
-          allowedElements={[
-            "p",
-            "br",
-            "em",
-            "h1",
-            "h2",
-            "h3",
-            "h4",
-            "h5",
-            "ul",
-            "ol",
-            "li",
-          ]}
-        />
+        <ReactMarkdown children={post.body} />
       </div>
     </Page>
   );
